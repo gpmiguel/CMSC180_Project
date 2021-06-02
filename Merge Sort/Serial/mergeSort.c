@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define N 20
+#define N 40
 
 // for checking if array is initialized correctly, and if array has been sorted correctly
 void printArray(int *arr){
@@ -21,7 +21,7 @@ void randomize(int *arr){
   }
 }
 
-void merge(int * a, int start, int mid, int end)  {  
+void merge(int * arr, int start, int mid, int end) {  
    int i = start;
    int j = mid + 1;
    int k;
@@ -29,11 +29,11 @@ void merge(int * a, int start, int mid, int end)  {
    int * temp = (int *) malloc(sizeof(int)*(end-start + 1));  
 
    while(i<=mid && j<=end){  
-     if(a[i]<a[j]){  
-         temp[index] = a[i];  
+     if(arr[i] < arr[j]){  
+         temp[index] = arr[i];  
          i = i+1;  
      } else{  
-         temp[index] = a[j];  
+         temp[index] = arr[j];  
          j = j+1;   
      }  
      
@@ -42,13 +42,13 @@ void merge(int * a, int start, int mid, int end)  {
  
    if(i>mid){  
       while(j<=end){  
-         temp[index] = a[j];  
+         temp[index] = arr[j];  
          index++;  
          j++;  
       }  
    } else {  
       while(i<=mid){  
-         temp[index] = a[i];  
+         temp[index] = arr[i];  
          index++;  
          i++;  
       }  
@@ -57,19 +57,19 @@ void merge(int * a, int start, int mid, int end)  {
    k = start;  
 
    while(k < index) {  
-      a[k]=temp[k];  
+      arr[k]=temp[k];  
       k++;  
    }
 }
 
-void mergeSort(int a[], int start, int end)  
+void mergeSort(int * arr, int start, int end)  
 {  
    int mid;  
    if(start < end) {  
       mid = (start+end)/2;  
-      mergeSort(a,start,mid);  
-      mergeSort(a,mid+1,end);  
-      merge(a,start,mid,end);  
+      mergeSort(arr,start,mid);  
+      mergeSort(arr,mid+1,end);  
+      merge(arr,start,mid,end);  
     }  
 } 
 
