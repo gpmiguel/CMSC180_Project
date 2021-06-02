@@ -17,7 +17,7 @@ void printArray(int *arr){
 void randomize(int *arr){
   int i;
   for (i = 0; i < N; ++i){
-    arr[i] = (rand() % (2*N)) - N;  
+    arr[i] = ((rand() % (2*N)) - N);  
   }
 }
 
@@ -26,7 +26,7 @@ void merge(int * a, int start, int mid, int end)  {
    int j = mid + 1;
    int k;
    int index = start;  
-   int temp[N];  
+   int * temp = (int *) malloc(sizeof(int)*(end-start + 1));  
 
    while(i<=mid && j<=end){  
      if(a[i]<a[j]){  
@@ -56,16 +56,16 @@ void merge(int * a, int start, int mid, int end)  {
 
    k = start;  
 
-   while(k<index) {  
+   while(k < index) {  
       a[k]=temp[k];  
       k++;  
-   }  
+   }
 }
 
 void mergeSort(int a[], int start, int end)  
 {  
    int mid;  
-   if(start<end) {  
+   if(start < end) {  
       mid = (start+end)/2;  
       mergeSort(a,start,mid);  
       mergeSort(a,mid+1,end);  
@@ -81,7 +81,7 @@ int main() {
    
    printArray(arr);
 
-   mergeSort(arr, 0, N);
+   mergeSort(arr, 0, N-1);
 
    printf("\nList after sorting\n");
    
