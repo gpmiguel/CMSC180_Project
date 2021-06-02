@@ -1,70 +1,89 @@
-/*
-Run the following algorithms and time them:
-1. Insertion sort
-2. Shell sort
-3. Merge sort
-4. Quick sort (built-in)
-
-Run for x, 2x, 3x, and 4x inputs (where x is your initial array size n).
-Run for ascending, descending, random input
-Replicate each run three (3) times. Record the average.
-Graph the results.
-Compare the actual running times to the supposed theoretical running times.
-Do they match? Analyze your results.
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <time.h>
-//#include <malloc.h>
+#define N 20
 
-// Initialization of data
-void init(int * a, int n){
-   int i;
+// for checking if array is initialized correctly, and if array has been sorted correctly
+void printArray(int *arr){
+  int i;
 
-   for(i=0; i<n; i++)
-      a[i] = (rand() % (2*n)) - n; 
+  for (i = 0; i < N; ++i){
+    printf("%d ", arr[i]);
+  }
+
+  printf("\n");
 }
 
-// Merge sort
-void merge (int * a, int lower, int mid, int upper){
-   int *temp,i,j,k;
-   temp=(int *)malloc((upper-lower+1)*sizeof(int));
-   for(i=0,j=lower,k=mid+1; j<=mid || k<=upper; i++)
-      temp[i]=((j <= mid) && (k > upper || a[j] <= a[k]))?a[j++]:a[k++];
-   for(i=0,j=lower;j<=upper; i++, j++)
-   a[j]=temp[i];
-   free(temp);
+// setting randomized values ranging from [-N, N] inclusive
+void randomize(int *arr){
+  int i;
+  for (i = 0; i < N; ++i){
+    arr[i] = (rand() % (2*N)) - N;  
+  }
 }
 
-void msort(int * a, int lower, int upper){
-   int mid;
-   if (upper-lower>0) {
-      mid=(lower+upper)/2;
-      msort(a, lower, mid);
-      msort(a, mid+1, upper);
-      merge(a, lower, mid, upper);
-   }
+void merge(int * a, int start, int mid, int end)  {  
+   int i = start;
+   int j = mid + 1;
+   int k;
+   int index = start;  
+   int temp[N];  
+
+   while(i<=mid && j<=end){  
+     if(a[i]<a[j]){  
+         temp[index] = a[i];  
+         i = i+1;  
+     } else{  
+         temp[index] = a[j];  
+         j = j+1;   
+     }  
+     
+     index++;  
+   }  
+ 
+   if(i>mid){  
+      while(j<=end){  
+         temp[index] = a[j];  
+         index++;  
+         j++;  
+      }  
+   } else {  
+      while(i<=mid){  
+         temp[index] = a[i];  
+         index++;  
+         i++;  
+      }  
+   }  
+
+   k = start;  
+
+   while(k<index) {  
+      a[k]=temp[k];  
+      k++;  
+   }  
 }
 
-int main(){
-   int n = 20;
-   int *a;
-   int i;
+void mergeSort(int a[], int start, int end)  
+{  
+   int mid;  
+   if(start<end) {  
+      mid = (start+end)/2;  
+      mergeSort(a,start,mid);  
+      mergeSort(a,mid+1,end);  
+      merge(a,start,mid,end);  
+    }  
+} 
 
-   a = (int*)malloc(sizeof(int)*n);
-   init(a,n);
+int main() { 
+   int *arr = (int *) malloc(sizeof(int)*N);
+   randomize(arr);
 
-   for(i=0;i<n;i++) printf("%d ", a[i]);
-   printf("\n");
-
-   msort(a, 0, n);
-
-   for(i=0;i<n;i++) printf("%d ", a[i]);
-   printf("\n");
+   printf("List before sorting\n");
    
-   free(a);
+   printArray(arr);
 
-   return 0;
+   mergeSort(arr, 0, N);
+
+   printf("\nList after sorting\n");
+   
+   printArray(arr);
 }
