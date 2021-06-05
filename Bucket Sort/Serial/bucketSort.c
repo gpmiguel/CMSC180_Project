@@ -1,9 +1,10 @@
 // Bucket sort in C
 
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 
-#define N 40   // Array size
+#define N 1000000   // Array size
 #define BUCKETS 2  // Number of buckets
 
 typedef struct Bucket {
@@ -83,7 +84,7 @@ void merge(int * arr, int start, int mid, int end) {
    int j = mid + 1;
    int k;
    int index = start;  
-   int * temp = (int *) malloc(sizeof(int)*(end-start + 1));  
+   int * temp = (int *) malloc(sizeof(int)*(N));  
 
    while(i<=mid && j<=end){  
      if(arr[i] < arr[j]){  
@@ -117,6 +118,8 @@ void merge(int * arr, int start, int mid, int end) {
       arr[k]=temp[k];  
       k++;  
    }
+
+   free(temp);
 }
 
 void mergeSort(int * arr, int start, int end)  
@@ -129,7 +132,6 @@ void mergeSort(int * arr, int start, int end)
       merge(arr,start,mid,end);  
     }  
 } 
-
 void randomize(int *arr){
     int i;
     for (i = 0; i < N; ++i){
@@ -142,13 +144,21 @@ int main(void) {
   int * arr = (int *) malloc(sizeof(int)*N);
   randomize(arr);
 
-  printf("Initial array: ");
-  printArray(arr);
-  printf("-------------\n");
+  struct timespec t1, t2;
+  long sec, nano;
+  double elapsed;
+
+  clock_gettime(CLOCK_REALTIME, &t1);
 
   BucketSort(arr);
-  printf("-------------\n");
-  printf("Sorted array: ");
-  printArray(arr);
+  
+  clock_gettime(CLOCK_REALTIME, &t2);
+
+  sec = t2.tv_sec - t1.tv_sec;
+  nano = t2.tv_nsec - t1.tv_nsec;
+  elapsed = sec + nano*1e-9;
+
+  printf("Time elapsed for Bucket Sort at N = %d is %f seconds\n\n", N, elapsed);
+
   return 0;
 }

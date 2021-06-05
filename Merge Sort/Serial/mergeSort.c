@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <malloc.h>
+#include <time.h>
 #include <stdlib.h>
-#define N 40
+#define N 1000000
 
 // for checking if array is initialized correctly, and if array has been sorted correctly
 void printArray(int *arr){
@@ -26,7 +28,7 @@ void merge(int * arr, int start, int mid, int end) {
    int j = mid + 1;
    int k;
    int index = start;  
-   int * temp = (int *) malloc(sizeof(int)*(end-start + 1));  
+   int * temp = (int *) malloc(sizeof(int)*(N));  
 
    while(i<=mid && j<=end){  
      if(arr[i] < arr[j]){  
@@ -60,6 +62,8 @@ void merge(int * arr, int start, int mid, int end) {
       arr[k]=temp[k];  
       k++;  
    }
+
+   free(temp);
 }
 
 void mergeSort(int * arr, int start, int end)  
@@ -77,13 +81,20 @@ int main() {
    int *arr = (int *) malloc(sizeof(int)*N);
    randomize(arr);
 
-   printf("List before sorting\n");
-   
-   printArray(arr);
+   struct timespec t1, t2;
+   long sec, nano;
+   double elapsed;
+
+   clock_gettime(CLOCK_REALTIME, &t1);
 
    mergeSort(arr, 0, N-1);
 
-   printf("\nList after sorting\n");
-   
-   printArray(arr);
+   clock_gettime(CLOCK_REALTIME, &t2);
+
+   sec = t2.tv_sec - t1.tv_sec;
+   nano = t2.tv_nsec - t1.tv_nsec;
+   elapsed = sec + nano*1e-9;
+
+   printf("Time elapsed for Merge Sort at N = %d is %f seconds\n\n", N, elapsed);
+
 }
