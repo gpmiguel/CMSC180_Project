@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include <time.h>
 #include <stdlib.h>
-#define N 1000000
+#define N 500000
 
 // for checking if array is initialized correctly, and if array has been sorted correctly
 void printArray(int *arr){
@@ -15,11 +15,11 @@ void printArray(int *arr){
   printf("\n");
 }
 
-// setting randomized values ranging from [-N, N] inclusive
+// setting randomized values ranging from [-N/2, N/2] inclusive
 void randomize(int *arr){
   int i;
   for (i = 0; i < N; ++i){
-    arr[i] = ((rand() % (2*N)) - N);  
+    arr[i] = (rand() % (N)) - (N/2);  
   }
 }
 

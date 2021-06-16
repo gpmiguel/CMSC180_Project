@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <sys/sysinfo.h>
-#define N 1000000
+#define N 450000
 
 int *arr;
 int BUCKETS;
@@ -143,7 +143,7 @@ void * BucketSort(void * argument) {
 void randomize(int *arr){
     int i;
     for (i = 0; i < N; ++i){
-      arr[i] = ((rand() % (2*N)) - N);  
+      arr[i] = (rand() % (N)) - (N/2);  
     }
 }
 
@@ -151,6 +151,9 @@ void randomize(int *arr){
 int main(void) {
   arr = (int *) malloc(sizeof(int)*N);
   randomize(arr);
+
+  // printArray(arr);
+  //printf("\n");
 
   int partitions = get_cpu_count();
   int start = 0;
@@ -215,6 +218,8 @@ int main(void) {
   elapsed = sec + nano*1e-9;
 
   printf("Time elapsed for Parallel Bucket Sort at N = %d is %f seconds\n\n", N, elapsed);
+
+  //printArray(arr);
 
   return 0;
 }

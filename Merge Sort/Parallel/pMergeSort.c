@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <sys/sysinfo.h>
-#define N 1000000
+#define N 500000
 
 // global variables
 
@@ -32,7 +32,7 @@ void printArray(int *arr){
 void randomize(int *arr){
   int i;
   for (i = 0; i < N; ++i){
-    arr[i] = ((rand() % (2*N)) - N);  
+    arr[i] = (rand() % (N)) - (N/2); 
   }
 }
 
@@ -103,7 +103,7 @@ int main() {
    arr = (int *) malloc(sizeof(int)*N);
    randomize(arr);
 
-   int partitions = get_cpu_count();
+   int partitions = 2 * get_cpu_count();
    int start = 0;
    int iterator = 0;
    int end = N/partitions;
@@ -128,7 +128,7 @@ int main() {
       cpu_set_t cpuset; 
 
      //the CPU we whant to use
-      int cpu = iterator;
+      int cpu = iterator % get_cpu_count();
 
       CPU_ZERO(&cpuset);       //clears the cpuset
       CPU_SET(cpu, &cpuset); // sets CPU

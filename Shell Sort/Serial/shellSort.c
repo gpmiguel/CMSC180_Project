@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define N 20000
+#define N 500000
 
 
 void swap(int *x, int *y){

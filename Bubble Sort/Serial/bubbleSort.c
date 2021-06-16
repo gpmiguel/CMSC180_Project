@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/sysinfo.h>
-#define N 2000
+#define N 500000
 
 // for checking if array is initialized correctly, and if array has been sorted correctly
 void printArray(int *arr){
@@ -39,7 +39,7 @@ void bubbleSort(int arr[], int n){
 void randomize(int *arr){
   int i;
   for (i = 0; i < N; ++i){
-    arr[i] = (rand() % (2*N)) - N;  
+    arr[i] = (rand() % (N)) - (N/2); 
   }
 }
 

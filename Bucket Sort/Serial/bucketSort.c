@@ -4,80 +4,14 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define N 1000000   // Array size
-#define BUCKETS 2  // Number of buckets
+#define N 500000   // Array size
+#define BUCKETS 4  // Number of buckets
 
 typedef struct Bucket {
   int upperBound;
   int size;
   int bucket[N];
 }buckets;
-
-void BucketSort(int * arr);
-void printArray(int * arr);
-int getBucketIndex(int value, int interval);
-void mergeSort(int * arr, int start, int end);
-void merge(int * arr, int start, int mid, int end);
-
-// Sorting function
-void BucketSort(int * arr) {
-  int i, j, interval, index = 0;
-  buckets bucketArray[BUCKETS];
-
-  // Create buckets
-  interval = (2*N) / BUCKETS;
-
-  for (i = 0; i < BUCKETS; ++i){
-      bucketArray[i].upperBound = (-N) + (i+1)*interval;
-      bucketArray[i].size = 0;
-  }
-
-  // Fill the buckets with respective elements
-  for (i = 0; i < N; ++i){
-      for (j = 0; j < BUCKETS; ++j){
-          if (arr[i] <= bucketArray[j].upperBound){
-              bucketArray[j].bucket[bucketArray[j].size] = arr[i];
-              bucketArray[j].size += 1;
-              break;
-          }
-      }
-  }
-
-  // Sort the elements of each bucket
-  for (i = 0; i < BUCKETS; ++i) {
-      mergeSort(bucketArray[i].bucket, 0, (bucketArray[i].size)-1);
-  }
-
-  // Print the buckets 
-
-  // for (int i = 0; i < BUCKETS; ++i){
-  //   for (int j = 0; j < bucketArray[i].size; ++j){
-  //     printf("%d ", bucketArray[i].bucket[j]);
-  //   }
-  //   printf("\n");
-  // }
-
-  // Put sorted elements on arr
-  for (i = 0; i < BUCKETS; ++i) {
-      for (j = 0; j < bucketArray[i].size; ++j){
-          arr[index++] = bucketArray[i].bucket[j];
-      }
-  } 
-}
-
-int getBucketIndex(int value, int interval) {
-  return value / interval;
-}
-
-void printArray(int *arr){
-  int i;
-
-  for (i = 0; i < N; ++i){
-    printf("%d ", arr[i]);
-  }
-
-  printf("\n");
-}
 
 void merge(int * arr, int start, int mid, int end) {  
    int i = start;
@@ -132,6 +66,55 @@ void mergeSort(int * arr, int start, int end)
       merge(arr,start,mid,end);  
     }  
 } 
+
+// 'Bucketing' function
+void BucketSort(int * arr) {
+  int i, j, interval, index = 0;
+  buckets bucketArray[BUCKETS];
+
+  // Create buckets
+  interval = (2*N) / BUCKETS;
+
+  for (i = 0; i < BUCKETS; ++i){
+      bucketArray[i].upperBound = (-N) + (i+1)*interval;
+      bucketArray[i].size = 0;
+  }
+
+  for (i = 0; i < N; ++i){
+      for (j = 0; j < BUCKETS; ++j){
+          if (arr[i] <= bucketArray[j].upperBound){
+              bucketArray[j].bucket[bucketArray[j].size] = arr[i];
+              bucketArray[j].size += 1;
+              break;
+          }
+      }
+  }
+
+  for (i = 0; i < BUCKETS; ++i) {
+      mergeSort(bucketArray[i].bucket, 0, (bucketArray[i].size)-1);
+  }
+
+  for (i = 0; i < BUCKETS; ++i) {
+      for (j = 0; j < bucketArray[i].size; ++j){
+          arr[index++] = bucketArray[i].bucket[j];
+      }
+  } 
+}
+
+int getBucketIndex(int value, int interval) {
+  return value / interval;
+}
+
+void printArray(int *arr){
+  int i;
+
+  for (i = 0; i < N; ++i){
+    printf("%d ", arr[i]);
+  }
+
+  printf("\n");
+}
+
 void randomize(int *arr){
     int i;
     for (i = 0; i < N; ++i){

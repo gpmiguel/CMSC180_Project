@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <sys/sysinfo.h>
-#define N 2000
+#define N 500000
 
 
 // global variables
@@ -57,7 +57,7 @@ void * parallelBubbleSort(void *argument){
 void randomize(int *arr){
   int i;
   for (i = 0; i < N; ++i){
-    arr[i] = (rand() % (N)) - (N/2);  
+    arr[i] = (rand() % (N)) - (N/2); 
   }
 }
 
