@@ -5,11 +5,12 @@
 #include <pthread.h>
 #include <time.h>
 #include <sys/sysinfo.h>
-#define N 500000
+
 
 // global variables
 
 int *arr;
+int N;
 
 typedef struct ARG{
    int iteration;
@@ -100,72 +101,85 @@ void * mergeHelper(void * argument){
 }
 
 int main() { 
-   arr = (int *) malloc(sizeof(int)*N);
-   randomize(arr);
 
-   int partitions = 2 * get_cpu_count();
-   int start = 0;
-   int iterator = 0;
-   int end = N/partitions;
-   int i, j;
+  FILE *fp;
 
-   args * arguments = (args *) malloc(sizeof(args)*partitions);
-   pthread_t * tid = (pthread_t *) malloc(sizeof(pthread_t)*partitions);
+  fp = fopen("pMergeSort.csv", "w+");
+  fprintf(fp, "N,seconds\n");
 
-   struct timespec t1, t2;
-   long sec, nano;
-   double elapsed;
+   for (N = 1000; N != 501000; N = N + 1000)
+   {
+      arr = (int *) malloc(sizeof(int)*N);
+      randomize(arr);
 
-   clock_gettime(CLOCK_REALTIME, &t1);
+      int partitions = 2 * get_cpu_count();
+      int start = 0;
+      int iterator = 0;
+      int end = N/partitions;
+      int i, j;
 
-   while(iterator != partitions){
-      arguments[iterator].iteration = 0;
-      arguments[iterator].end = end;
-      arguments[iterator].arr = (int *) malloc(sizeof(int) * (N/partitions));
+      args * arguments = (args *) malloc(sizeof(args)*partitions);
+      pthread_t * tid = (pthread_t *) malloc(sizeof(pthread_t)*partitions);
 
-      for(j = 0; j < end; j++) arguments[iterator].arr[j] = arr[j+(iterator*(N/partitions))];
+      struct timespec t1, t2;
+      long sec, nano;
+      double elapsed;
 
-      cpu_set_t cpuset; 
+      clock_gettime(CLOCK_REALTIME, &t1);
 
-     //the CPU we whant to use
-      int cpu = iterator % get_cpu_count();
+      while(iterator != partitions){
+         arguments[iterator].iteration = 0;
+         arguments[iterator].end = end;
+         arguments[iterator].arr = (int *) malloc(sizeof(int) * (N/partitions));
 
-      CPU_ZERO(&cpuset);       //clears the cpuset
-      CPU_SET(cpu, &cpuset); // sets CPU
+         for(j = 0; j < end; j++) arguments[iterator].arr[j] = arr[j+(iterator*(N/partitions))];
 
-      pthread_create(&(tid[iterator]), NULL, mergeHelper, (void *) &arguments[iterator]);
-      pthread_setaffinity_np(tid[iterator], sizeof(cpuset), &cpuset);
+         cpu_set_t cpuset; 
 
-      iterator++;
-   }
+        //the CPU we whant to use
+         int cpu = iterator % get_cpu_count();
 
-   for (int i = 0; i < partitions; i++){
-      pthread_join(tid[i], NULL); // to wait for thread execution to finish for each node before proceeding
-   }
+         CPU_ZERO(&cpuset);       //clears the cpuset
+         CPU_SET(cpu, &cpuset); // sets CPU
 
-   free(tid);
+         pthread_create(&(tid[iterator]), NULL, mergeHelper, (void *) &arguments[iterator]);
+         pthread_setaffinity_np(tid[iterator], sizeof(cpuset), &cpuset);
 
-   for (i = 0; i < N; i++){
-      int smallest = (N+1);
-      int index;
-      for(j = 0; j < partitions; j++){
-         if (arguments[j].arr[arguments[j].iteration] < smallest && arguments[j].iteration != arguments[j].end){
-            smallest = arguments[j].arr[arguments[j].iteration];
-            index = j;
-         }
+         iterator++;
       }
 
-      arr[i] = smallest;
-      arguments[index].iteration += 1;
+      for (int i = 0; i < partitions; i++){
+         pthread_join(tid[i], NULL); // to wait for thread execution to finish for each node before proceeding
+      }
+
+      free(tid);
+
+      for (i = 0; i < N; i++){
+         int smallest = (N+1);
+         int index;
+         for(j = 0; j < partitions; j++){
+            if (arguments[j].arr[arguments[j].iteration] < smallest && arguments[j].iteration != arguments[j].end){
+               smallest = arguments[j].arr[arguments[j].iteration];
+               index = j;
+            }
+         }
+
+         arr[i] = smallest;
+         arguments[index].iteration += 1;
+      }
+
+      clock_gettime(CLOCK_REALTIME, &t2);
+
+      sec = t2.tv_sec - t1.tv_sec;
+      nano = t2.tv_nsec - t1.tv_nsec;
+      elapsed = sec + nano*1e-9;
+
+      printf("Time elapsed for Parallel Merge Sort at N = %d is %f seconds\n\n", N, elapsed);
+      fprintf(fp, "%d,%f\n", N, elapsed);
+
+      free(arr);
+      free(arguments);
    }
 
-   clock_gettime(CLOCK_REALTIME, &t2);
-
-   sec = t2.tv_sec - t1.tv_sec;
-   nano = t2.tv_nsec - t1.tv_nsec;
-   elapsed = sec + nano*1e-9;
-
-   printf("Time elapsed for Parallel Merge Sort at N = %d is %f seconds\n\n", N, elapsed);
-   
 
 }

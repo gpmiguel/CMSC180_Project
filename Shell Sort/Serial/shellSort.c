@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define N 500000
+
+int N;
 
 
 void swap(int *x, int *y){
@@ -40,24 +41,34 @@ void shellsort(int * a, int n){
 }
 
 int main(){
-	int *arr = (int *) malloc(sizeof(int)*N);
-	randomize(arr);
 
-	struct timespec t1, t2;
-  	long sec, nano;
-  	double elapsed;
+	FILE *fp;
 
-  	clock_gettime(CLOCK_REALTIME, &t1);
+	fp = fopen("shellSort.csv", "w+");
+	fprintf(fp, "N,seconds\n");
 
-	shellsort(arr, N);
+	for (N = 1000; N != 501000; N = N + 1000){
+		int *arr = (int *) malloc(sizeof(int)*N);
+		randomize(arr);
 
-	clock_gettime(CLOCK_REALTIME, &t2);
+		struct timespec t1, t2;
+	  	long sec, nano;
+	  	double elapsed;
 
-	sec = t2.tv_sec - t1.tv_sec;
-	nano = t2.tv_nsec - t1.tv_nsec;
-	elapsed = sec + nano*1e-9;
+	  	clock_gettime(CLOCK_REALTIME, &t1);
 
-	printf("Time elapsed for Shell Sort at N = %d is %f seconds\n\n", N, elapsed);
+		shellsort(arr, N);
 
+		clock_gettime(CLOCK_REALTIME, &t2);
+
+		sec = t2.tv_sec - t1.tv_sec;
+		nano = t2.tv_nsec - t1.tv_nsec;
+		elapsed = sec + nano*1e-9;
+
+		printf("Time elapsed for Shell Sort at N = %d is %f seconds\n\n", N, elapsed);
+		fprintf(fp, "%d,%f\n", N, elapsed);
+
+		free(arr);
+	}
 
 }

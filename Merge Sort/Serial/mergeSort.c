@@ -2,7 +2,8 @@
 #include <malloc.h>
 #include <time.h>
 #include <stdlib.h>
-#define N 500000
+
+int N;
 
 // for checking if array is initialized correctly, and if array has been sorted correctly
 void printArray(int *arr){
@@ -78,23 +79,36 @@ void mergeSort(int * arr, int start, int end)
 } 
 
 int main() { 
-   int *arr = (int *) malloc(sizeof(int)*N);
-   randomize(arr);
 
-   struct timespec t1, t2;
-   long sec, nano;
-   double elapsed;
+   FILE *fp;
 
-   clock_gettime(CLOCK_REALTIME, &t1);
+   fp = fopen("mergeSort.csv", "w+");
+   fprintf(fp, "N,seconds\n");
 
-   mergeSort(arr, 0, N-1);
+   for (N = 1000; N != 501000; N = N + 1000)
+   {
+      int *arr = (int *) malloc(sizeof(int)*N);
+      randomize(arr);
 
-   clock_gettime(CLOCK_REALTIME, &t2);
+      struct timespec t1, t2;
+      long sec, nano;
+      double elapsed;
 
-   sec = t2.tv_sec - t1.tv_sec;
-   nano = t2.tv_nsec - t1.tv_nsec;
-   elapsed = sec + nano*1e-9;
+      clock_gettime(CLOCK_REALTIME, &t1);
 
-   printf("Time elapsed for Merge Sort at N = %d is %f seconds\n\n", N, elapsed);
+      mergeSort(arr, 0, N-1);
 
+      clock_gettime(CLOCK_REALTIME, &t2);
+
+      sec = t2.tv_sec - t1.tv_sec;
+      nano = t2.tv_nsec - t1.tv_nsec;
+      elapsed = sec + nano*1e-9;
+
+      printf("Time elapsed for Merge Sort at N = %d is %f seconds\n\n", N, elapsed);
+      fprintf(fp, "%d,%f\n", N, elapsed);
+
+      free(arr);
+   }
+
+   
 }

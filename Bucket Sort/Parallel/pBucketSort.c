@@ -7,7 +7,8 @@
 #include <pthread.h>
 #include <time.h>
 #include <sys/sysinfo.h>
-#define N 450000
+
+int N;
 
 int *arr;
 int BUCKETS;
@@ -149,77 +150,89 @@ void randomize(int *arr){
 
 // Driver code
 int main(void) {
-  arr = (int *) malloc(sizeof(int)*N);
-  randomize(arr);
 
-  // printArray(arr);
-  //printf("\n");
+  FILE *fp;
 
-  int partitions = get_cpu_count();
-  int start = 0;
-  int iterator = 0;
-  int end = N/partitions;
-  int i, j;
+  fp = fopen("pBucketSort.csv", "w+");
+  fprintf(fp, "N,seconds\n");
 
-  args * arguments = (args *) malloc(sizeof(args)*partitions);
-  pthread_t * tid = (pthread_t *) malloc(sizeof(pthread_t)*partitions);
+  for (N = 1000; N != 501000; N = N + 1000)
+  {
+      arr = (int *) malloc(sizeof(int)*N);
+      randomize(arr);
 
-  struct timespec t1, t2;
-  long sec, nano;
-  double elapsed;
+      // printArray(arr);
+      //printf("\n");
 
-  clock_gettime(CLOCK_REALTIME, &t1);
+      int partitions = get_cpu_count();
+      int start = 0;
+      int iterator = 0;
+      int end = N/partitions;
+      int i, j;
 
-  while(iterator != partitions){
-    arguments[iterator].iteration = 0;
-    arguments[iterator].end = end;
-    arguments[iterator].arr = (int *) malloc(sizeof(int) * (N/partitions));
+      args * arguments = (args *) malloc(sizeof(args)*partitions);
+      pthread_t * tid = (pthread_t *) malloc(sizeof(pthread_t)*partitions);
 
-    for(j = 0; j < end; j++) arguments[iterator].arr[j] = arr[j+(iterator*(N/partitions))];
+      struct timespec t1, t2;
+      long sec, nano;
+      double elapsed;
 
-    cpu_set_t cpuset; 
+      clock_gettime(CLOCK_REALTIME, &t1);
 
-   //the CPU we whant to use
-    int cpu = iterator;
+      while(iterator != partitions){
+        arguments[iterator].iteration = 0;
+        arguments[iterator].end = end;
+        arguments[iterator].arr = (int *) malloc(sizeof(int) * (N/partitions));
 
-    CPU_ZERO(&cpuset);       //clears the cpuset
-    CPU_SET(cpu, &cpuset); // sets CPU
+        for(j = 0; j < end; j++) arguments[iterator].arr[j] = arr[j+(iterator*(N/partitions))];
 
-    pthread_create(&(tid[iterator]), NULL, BucketSort, (void *) &arguments[iterator]);
-    pthread_setaffinity_np(tid[iterator], sizeof(cpuset), &cpuset);
+        cpu_set_t cpuset; 
 
-    iterator++;
+       //the CPU we whant to use
+        int cpu = iterator;
+
+        CPU_ZERO(&cpuset);       //clears the cpuset
+        CPU_SET(cpu, &cpuset); // sets CPU
+
+        pthread_create(&(tid[iterator]), NULL, BucketSort, (void *) &arguments[iterator]);
+        pthread_setaffinity_np(tid[iterator], sizeof(cpuset), &cpuset);
+
+        iterator++;
+      }
+
+      for (int i = 0; i < partitions; i++){
+        pthread_join(tid[i], NULL); // to wait for thread execution to finish for each node before proceeding
+      }
+
+      for (i = 0; i < N; i++){
+        int smallest = (N+1);
+        int index;
+        for(j = 0; j < partitions; j++){
+           if (arguments[j].arr[arguments[j].iteration] < smallest && arguments[j].iteration != arguments[j].end){
+              smallest = arguments[j].arr[arguments[j].iteration];
+              index = j;
+           }
+        }
+
+        arr[i] = smallest;
+        arguments[index].iteration += 1;
+      }
+
+      clock_gettime(CLOCK_REALTIME, &t2);
+
+      sec = t2.tv_sec - t1.tv_sec;
+      nano = t2.tv_nsec - t1.tv_nsec;
+      elapsed = sec + nano*1e-9;
+
+      printf("Time elapsed for Parallel Bucket Sort at N = %d is %f seconds\n\n", N, elapsed);
+      fprintf(fp, "%d,%f\n", N, elapsed);
+
+      //printArray(arr);
+
+      free(arr);
+      free(arguments);
+      free(tid);
   }
-
-  for (int i = 0; i < partitions; i++){
-    pthread_join(tid[i], NULL); // to wait for thread execution to finish for each node before proceeding
-  }
-
-  free(tid);
-
-  for (i = 0; i < N; i++){
-    int smallest = (N+1);
-    int index;
-    for(j = 0; j < partitions; j++){
-       if (arguments[j].arr[arguments[j].iteration] < smallest && arguments[j].iteration != arguments[j].end){
-          smallest = arguments[j].arr[arguments[j].iteration];
-          index = j;
-       }
-    }
-
-    arr[i] = smallest;
-    arguments[index].iteration += 1;
-  }
-
-  clock_gettime(CLOCK_REALTIME, &t2);
-
-  sec = t2.tv_sec - t1.tv_sec;
-  nano = t2.tv_nsec - t1.tv_nsec;
-  elapsed = sec + nano*1e-9;
-
-  printf("Time elapsed for Parallel Bucket Sort at N = %d is %f seconds\n\n", N, elapsed);
-
-  //printArray(arr);
 
   return 0;
 }

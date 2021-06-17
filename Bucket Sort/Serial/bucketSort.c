@@ -4,13 +4,14 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define N 500000   // Array size
+int N;
+
 #define BUCKETS 4  // Number of buckets
 
 typedef struct Bucket {
   int upperBound;
   int size;
-  int bucket[N];
+  int *bucket;
 }buckets;
 
 void merge(int * arr, int start, int mid, int end) {  
@@ -78,6 +79,8 @@ void BucketSort(int * arr) {
   for (i = 0; i < BUCKETS; ++i){
       bucketArray[i].upperBound = (-N) + (i+1)*interval;
       bucketArray[i].size = 0;
+      bucketArray[i].bucket = (int *) malloc(sizeof(int) * N);
+
   }
 
   for (i = 0; i < N; ++i){
@@ -124,24 +127,38 @@ void randomize(int *arr){
 
 // Driver code
 int main(void) {
-  int * arr = (int *) malloc(sizeof(int)*N);
-  randomize(arr);
 
-  struct timespec t1, t2;
-  long sec, nano;
-  double elapsed;
+  FILE *fp;
 
-  clock_gettime(CLOCK_REALTIME, &t1);
+  fp = fopen("bucketSort.csv", "w+");
+  fprintf(fp, "N,seconds\n");
 
-  BucketSort(arr);
+  for (N = 1000; N != 501000 ; N = N + 1000)
+  {
+    int * arr = (int *) malloc(sizeof(int)*N);
+    randomize(arr);
+
+    struct timespec t1, t2;
+    long sec, nano;
+    double elapsed;
+
+    clock_gettime(CLOCK_REALTIME, &t1);
+
+    BucketSort(arr);
+    
+    clock_gettime(CLOCK_REALTIME, &t2);
+
+    sec = t2.tv_sec - t1.tv_sec;
+    nano = t2.tv_nsec - t1.tv_nsec;
+    elapsed = sec + nano*1e-9;
+
+    printf("Time elapsed for Bucket Sort at N = %d is %f seconds\n\n", N, elapsed);
+    fprintf(fp, "%d,%f\n", N, elapsed);
+
+    free(arr);
+  }
+
   
-  clock_gettime(CLOCK_REALTIME, &t2);
-
-  sec = t2.tv_sec - t1.tv_sec;
-  nano = t2.tv_nsec - t1.tv_nsec;
-  elapsed = sec + nano*1e-9;
-
-  printf("Time elapsed for Bucket Sort at N = %d is %f seconds\n\n", N, elapsed);
 
   return 0;
 }

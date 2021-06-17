@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/sysinfo.h>
-#define N 500000
+
+int N;
 
 // for checking if array is initialized correctly, and if array has been sorted correctly
 void printArray(int *arr){
@@ -45,26 +46,65 @@ void randomize(int *arr){
 
 // Driver program to test above functions
 int main(){
-  int *arr = (int *) malloc(sizeof(int)*N);
 
-  randomize(arr);
+  FILE *fp;
 
-  struct timespec t1, t2;
-  long sec, nano;
-  double elapsed;
+  fp = fopen("bubbleSort.csv", "w+");
+  fprintf(fp, "N,seconds\n");
 
-  clock_gettime(CLOCK_REALTIME, &t1);
+  for (N = 1000; N != 150000; N = N + 1000)
+  {
+    int *arr = (int *) malloc(sizeof(int)*N);
 
-  bubbleSort(arr, N);
+    randomize(arr);
+
+    struct timespec t1, t2;
+    long sec, nano;
+    double elapsed;
+
+    clock_gettime(CLOCK_REALTIME, &t1);
+
+    bubbleSort(arr, N);
+    
+    clock_gettime(CLOCK_REALTIME, &t2);
+
+    sec = t2.tv_sec - t1.tv_sec;
+    nano = t2.tv_nsec - t1.tv_nsec;
+    elapsed = sec + nano*1e-9;
+
+    printf("Time elapsed for Serial Bubble Sort at N = %d is %f seconds\n\n", N, elapsed);
+    fprintf(fp, "%d,%f\n", N, elapsed);
+
+    free(arr);
+  }
+
+  for (N = 150000; N != 550000; N = N + 50000)
+  {
+    int *arr = (int *) malloc(sizeof(int)*N);
+
+    randomize(arr);
+
+    struct timespec t1, t2;
+    long sec, nano;
+    double elapsed;
+
+    clock_gettime(CLOCK_REALTIME, &t1);
+
+    bubbleSort(arr, N);
+    
+    clock_gettime(CLOCK_REALTIME, &t2);
+
+    sec = t2.tv_sec - t1.tv_sec;
+    nano = t2.tv_nsec - t1.tv_nsec;
+    elapsed = sec + nano*1e-9;
+
+    printf("Time elapsed for Serial Bubble Sort at N = %d is %f seconds\n\n", N, elapsed);
+    fprintf(fp, "%d,%f\n", N, elapsed);
+
+    free(arr);
+  }
+
+
   
-  clock_gettime(CLOCK_REALTIME, &t2);
-
-  sec = t2.tv_sec - t1.tv_sec;
-  nano = t2.tv_nsec - t1.tv_nsec;
-  elapsed = sec + nano*1e-9;
-
-  printf("Time elapsed for Serial Bubble Sort at N = %d is %f seconds\n\n", N, elapsed);
-
-
   return 0;
 }
